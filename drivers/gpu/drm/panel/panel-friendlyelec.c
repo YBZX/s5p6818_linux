@@ -61,6 +61,32 @@ static struct lcd_desc hd900 = {
 	},
 };
 
+static struct lcd_desc at070tn92 = {
+	.width = 800,
+	.height = 480,
+	.p_width = 154,
+	.p_height = 86,
+	.bpp = 24,
+	.freq = 60,
+
+	.timing = {
+		.h_fp = 210,
+		.h_bp = 46,
+		.h_sw = 20,
+		.v_fp =  22,
+		.v_fpe = 1,
+		.v_bp =  23,
+		.v_bpe = 1,
+		.v_sw =  10,
+	},
+	.polarity = {
+		.rise_vclk = 0,
+		.inv_hsync = 0,
+		.inv_vsync = 1,
+		.inv_vden = 0,
+	},
+};
+
 static struct lcd_desc hd700 = {
 	.width = 800,
 	.height = 1280,
@@ -119,17 +145,17 @@ static struct lcd_desc s702 = {
 	.p_width = 155,
 	.p_height = 93,
 	.bpp = 24,
-	.freq = 61,
+	.freq = 33,
 
 	.timing = {
-		.h_fp = 44,
-		.h_bp = 26,
+		.h_fp = 210,
+		.h_bp = 46,
 		.h_sw = 20,
 		.v_fp = 22,
 		.v_fpe = 1,
-		.v_bp = 15,
+		.v_bp = 23,
 		.v_bpe = 1,
-		.v_sw = 8,
+		.v_sw = 10,
 	},
 	.polarity = {
 		.rise_vclk = 1,
@@ -630,6 +656,7 @@ static struct {
 	{ "LQ150",	&lq150,	1 },
 	{ "L80",	&l80,	1 },
 	{ "BP101",	&bp101,	1 },
+	{ "AT070TN92",	&at070tn92,	0  },
 
 	{ "HDMI",	&hdmi_def,	0 },	/* Pls keep it at last */
 };
@@ -646,12 +673,13 @@ static int panel_setup_lcd(char *str)
 {
 	char *delim;
 	int i;
-
 	delim = strchr(str, ',');
 	if (delim)
 		*delim++ = '\0';
 
+	//比较str前4个字符，不区分大小写，相等返回0
 	if (!strncasecmp("HDMI", str, 4)) {
+		printk("yutest: %s  %d \n", __FILE__,__LINE__);
 		struct hdmi_config *cfg = &panel_hdmi_modes[0];
 		struct lcd_desc *lcd;
 
@@ -663,6 +691,7 @@ static int panel_setup_lcd(char *str)
 				lcd->width = cfg->width;
 				lcd->height = cfg->height;
 #ifndef CONFIG_MACH_ANDROID_BUILD
+				printk("yutest: %s  %d \n", __FILE__,__LINE__);
 				lcd_connected = false;
 #endif
 				goto __ret;
@@ -672,6 +701,7 @@ static int panel_setup_lcd(char *str)
 
 	for (i = 0; i < ARRAY_SIZE(panel_lcd_list); i++) {
 		if (!strcasecmp(panel_lcd_list[i].name, str)) {
+			printk("yutest: choose %s %s  %d \n", panel_lcd_list[i].name, __FILE__,__LINE__);
 			lcd_idx = i;
 			break;
 		}
@@ -683,7 +713,7 @@ __ret:
 	printk("Display: %s selected\n", panel_lcd_list[lcd_idx].name);
 	return 0;
 }
-early_param("lcd", panel_setup_lcd);
+// early_param("lcd", panel_setup_lcd);
 
 int panel_is_lcd_connected(void)
 {
@@ -904,6 +934,8 @@ static int panel_get_modes(struct drm_panel *panel)
 		drm_display_info_set_bus_formats(&connector->display_info,
 				&ctx->bus_format, 1);
 
+	printk("Display: width:%d %d %d %d %s %d1\n", mode->hdisplay,mode->vdisplay,mode->clock,mode->htotal,__FILE__,__LINE__);
+
 	drm_mode_probed_add(connector, mode);
 	return 1;
 }
@@ -986,22 +1018,29 @@ static int panel_probe(struct device *dev)
 
 	err = of_property_read_string(dev->of_node, "lcd", &str);
 	if (!err) {
+		printk("yutest: %s  %d \n", __FILE__,__LINE__);
 		char lcd[64];
-		strlcpy(lcd, str, sizeof(lcd));
+		// strlcpy(lcd, str, sizeof(lcd));
+		strcpy(lcd,"AT070TN92");
 		panel_setup_lcd(lcd);
 	}
-
 	if (!lcd_connected)
+	{
 		return -ENODEV;
+	}
+	printk("yutest: %s  %d \n", __FILE__,__LINE__);
+		
 
 	panel = devm_kzalloc(dev, sizeof(*panel), GFP_KERNEL);
 	if (!panel)
 		return -ENOMEM;
 
+
 	panel->enabled = false;
 	panel->prepared = false;
 
 	panel_display_mode_init(panel);
+	printk("Display: width:%d %d %d %d %s %d1\n", panel->mode->hdisplay,panel->mode->vdisplay,panel->mode->clock,panel->mode->htotal,__LINE__);
 
 	panel->supply = devm_regulator_get(dev, "power");
 	if (IS_ERR(panel->supply))
@@ -1023,16 +1062,18 @@ static int panel_probe(struct device *dev)
 		if (!panel->backlight)
 			return -EPROBE_DEFER;
 	}
-
+	printk("Display: width:%d %d %s %d1\n", panel->mode->hdisplay,panel->mode->vdisplay,__FILE__,__LINE__);
 	drm_panel_init(&panel->base);
 	panel->base.dev = dev;
 	panel->base.funcs = &panel_funcs;
 
 	err = drm_panel_add(&panel->base);
+		printk("Display: width:%d %d %s %d1\n", panel->mode->hdisplay,panel->mode->vdisplay,__FILE__,__LINE__);
 	if (err < 0)
 		goto free_backlight;
 
 	dev_set_drvdata(dev, panel);
+		printk("Display: width:%d %d %s %d1\n", panel->mode->hdisplay,panel->mode->vdisplay,__FILE__,__LINE__);
 
 	return 0;
 

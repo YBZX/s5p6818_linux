@@ -164,6 +164,7 @@ static int panel_lcd_ops_get_modes(struct device *dev,
 	struct videomode *vm = &display->vm;
 	struct drm_display_mode *mode;
 	u32 hto, vto;
+	DRM_INFO("%s %d  \n", __FILE__,__LINE__);
 
 	DRM_DEBUG_KMS("panel %s\n",
 		display->panel ? "attached" : "detached");
@@ -191,6 +192,7 @@ static int panel_lcd_ops_get_modes(struct device *dev,
 
 	drm_mode_set_name(mode);
 	drm_mode_probed_add(connector, mode);
+	DRM_INFO("%s %d %dx%d \n", __FILE__,__LINE__,mode->hdisplay,mode->vdisplay);
 
 	DRM_DEBUG_KMS("exit, (%dx%d, flags=0x%x)\n",
 		mode->hdisplay, mode->vdisplay, mode->flags);
@@ -537,11 +539,13 @@ static int panel_lcd_parse_dt(struct platform_device *pdev,
 	/* get panel timing from local. */
 	np = of_graph_get_remote_port_parent(node);
 	display->panel_node = np;
+	DRM_INFO("%s %d  \n", __FILE__,__LINE__);
 	if (!np) {
 		struct gpio_descs *gpios;
 		struct gpio_desc **desc = NULL;
 		int i, ngpios = 0;
 
+		DRM_INFO("%s %d  \n", __FILE__,__LINE__);
 		DRM_INFO("not use remote panel node (%s) !\n",
 			node->full_name);
 
@@ -615,6 +619,7 @@ static int panel_lcd_parse_dt(struct platform_device *pdev,
 		err = of_get_display_timing(node, "display-timing", &timing);
 		if (err == 0) {
 			videomode_from_timing(&timing, &display->vm);
+			DRM_INFO("%s %d %d %d \n", __FILE__,__LINE__,&timing.hsync_len);
 			ctx->local_timing = true;
 		}
 	}
@@ -668,6 +673,8 @@ static int panel_lcd_probe(struct platform_device *pdev)
 	size_t size;
 	int err;
 
+	DRM_INFO("%s %d \n", __FILE__,__LINE__);
+
 	DRM_DEBUG_KMS("enter (%s)\n", dev_name(dev));
 
 	size = sizeof(*ctx);
@@ -706,7 +713,7 @@ static int panel_lcd_probe(struct platform_device *pdev)
 
 	dev_set_drvdata(dev, ctx);
 	component_add(dev, &panel_comp_ops);
-
+	DRM_INFO("%s %d \n", __FILE__,__LINE__);
 	DRM_DEBUG_KMS("done\n");
 	return err;
 

@@ -220,10 +220,11 @@ void drm_err(const char *format, ...);
 		if (unlikely(drm_debug & DRM_UT_DRIVER))		\
 			drm_ut_debug_printk(__func__, fmt, ##args);	\
 	} while (0)
+// if (unlikely(drm_debug & DRM_UT_KMS))
 #define DRM_DEBUG_KMS(fmt, args...)					\
 	do {								\
-		if (unlikely(drm_debug & DRM_UT_KMS))			\
-			drm_ut_debug_printk(__func__, fmt, ##args);	\
+		if (1)			\
+			_DRM_PRINTK(, INFO, fmt, ##args);	\
 	} while (0)
 #define DRM_DEBUG_PRIME(fmt, args...)					\
 	do {								\

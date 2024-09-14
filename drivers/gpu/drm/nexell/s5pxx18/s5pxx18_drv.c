@@ -1383,29 +1383,29 @@ static void display_param_dump(struct nx_drm_display *display)
 	struct nx_control_dev *control = dp_to_control(display);
 	struct nx_control_info *ctrl = &control->ctrl;
 
-	DRM_DEBUG_KMS("%s:\n", nx_panel_get_name(display->panel_type));
-	DRM_DEBUG_KMS("SYNC -> LCD %d x %d mm\n",
+	DRM_ERROR("%s:\n", nx_panel_get_name(display->panel_type));
+	DRM_ERROR("SYNC -> LCD %d x %d mm\n",
 		display->width_mm, display->height_mm);
-	DRM_DEBUG_KMS("ha:%d, hs:%d, hb:%d, hf:%d\n",
+	DRM_ERROR("ha:%d, hs:%d, hb:%d, hf:%d\n",
 	    display->vm.hactive, display->vm.hsync_len,
 	    display->vm.hback_porch, display->vm.hfront_porch);
-	DRM_DEBUG_KMS("va:%d, vs:%d, vb:%d, vf:%d\n",
+	DRM_ERROR("va:%d, vs:%d, vb:%d, vf:%d\n",
 		display->vm.vactive, display->vm.vsync_len,
 	    display->vm.vback_porch, display->vm.vfront_porch);
-	DRM_DEBUG_KMS("flags:0x%x\n", display->vm.flags);
-	DRM_DEBUG_KMS("cs0:%d, cd0:%d, cs1:%d, cd1:%d\n",
+	DRM_ERROR("flags:0x%x\n", display->vm.flags);
+	DRM_ERROR("cs0:%d, cd0:%d, cs1:%d, cd1:%d\n",
 	    ctrl->clk_src_lv0, ctrl->clk_div_lv0,
 	    ctrl->clk_src_lv1, ctrl->clk_div_lv1);
-	DRM_DEBUG_KMS("fmt:0x%x, inv:%d, swap:%d, yb:0x%x\n",
+	DRM_ERROR("fmt:0x%x, inv:%d, swap:%d, yb:0x%x\n",
 	    ctrl->out_format, ctrl->invert_field,
 	    ctrl->swap_rb, ctrl->yc_order);
-	DRM_DEBUG_KMS("dm:0x%x, drp:%d, dhs:%d, dvs:%d, dde:0x%x\n",
+	DRM_ERROR("dm:0x%x, drp:%d, dhs:%d, dvs:%d, dde:0x%x\n",
 	    ctrl->delay_mask, ctrl->d_rgb_pvd,
 	    ctrl->d_hsync_cp1, ctrl->d_vsync_fram, ctrl->d_de_cp2);
-	DRM_DEBUG_KMS("vss:%d, vse:%d, evs:%d, eve:%d\n",
+	DRM_ERROR("vss:%d, vse:%d, evs:%d, eve:%d\n",
 	    ctrl->vs_start_offset, ctrl->vs_end_offset,
 	    ctrl->ev_start_offset, ctrl->ev_end_offset);
-	DRM_DEBUG_KMS("sel:%d, i0:%d, d0:%d, i1:%d, d1:%d, s1:%d\n",
+	DRM_ERROR("sel:%d, i0:%d, d0:%d, i1:%d, d1:%d, s1:%d\n",
 	    ctrl->vck_select, ctrl->clk_inv_lv0, ctrl->clk_delay_lv0,
 	    ctrl->clk_inv_lv1, ctrl->clk_delay_lv1, ctrl->clk_sel_div1);
 }
@@ -1560,7 +1560,7 @@ int nx_drm_display_setup(struct nx_drm_display *display,
 		display->vm.pixelclock = pixclock;
 		clk_put(clk);
 
-		DRM_DEBUG_KMS("SYNC -> PLL.%d, pixelclock %ld (%d,%d)\n",
+		DRM_ERROR("SYNC -> PLL.%d, pixelclock %ld (%d,%d)\n",
 			ctrl->clk_src_lv0, pixclock,
 			ctrl->clk_div_lv0, ctrl->clk_div_lv1);
 	}
